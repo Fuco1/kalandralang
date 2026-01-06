@@ -33,6 +33,13 @@ let show_eld = function
 let pp_eld eld =
   Pretext.atom (show_eld eld)
 
+let add_eldritch a b =
+  match a, b with
+    | Exarch, Exarch -> Exarch
+    | Eater, Eater -> Eater
+    | Exarch_and_eater, _ | _, Exarch_and_eater -> Exarch_and_eater
+    | Exarch, Eater | Eater, Exarch -> Exarch_and_eater
+
 let compare_sec = (Stdlib.compare: sec -> sec -> int)
 
 (* TODO: fractured + exarch / eater (don't forget to update [includes]) *)
@@ -63,15 +70,14 @@ let add a b =
     | Fractured x, Fractured y ->
         (match x, y with
           | None, None -> Fractured None
-          | Some eld, None | None, Some eld -> Fractured (Some eld)
-          | Some eld1, Some eld2 when eld1 = eld2 -> Fractured (Some eld1)
-          | Some _, Some _ -> Fractured (Some Exarch_and_eater)
+          | Some eld, None
+          | None, Some eld ->
+              Fractured (Some eld)
+          | Some eld1, Some eld2 -> Fractured (Some (add_eldritch eld1 eld2))
         )
     | Eldritch eld, Fractured None -> Fractured (Some eld)
     | Fractured None, Eldritch eld -> Fractured (Some eld)
-    | Fractured (Some eld1), Eldritch eld2 when eld1 = eld2 -> Fractured (Some eld1)
-    | Fractured (Some eld1), Eldritch eld2 when eld1 <> eld2 -> Fractured (Some Exarch_and_eater)
-    | Fractured (Some Exarch_and_eater), Eldritch _ -> Fractured (Some Exarch_and_eater)
+    | Fractured (Some eld1), Eldritch eld2 -> Fractured (Some (add_eldritch eld1 eld2))
     | Fractured _, _ | _, Fractured _ ->
         fail "cannot both be fractured and influenced"
     | Synthesized, Synthesized ->
@@ -87,12 +93,7 @@ let add a b =
         sec2
     | SEC _, SEC_pair _ | SEC_pair _, SEC _ | SEC_pair _, SEC_pair _ ->
         fail "cannot have more than two influences"
-    | Eldritch Exarch, Eldritch Exarch -> Eldritch Exarch
-    | Eldritch Eater, Eldritch Eater -> Eldritch Eater
-    | Eldritch Exarch_and_eater, Eldritch _ -> Eldritch Exarch_and_eater
-    | Eldritch _, Eldritch Exarch_and_eater  -> Eldritch Exarch_and_eater
-    | Eldritch Exarch, Eldritch Eater | Eldritch Eater, Eldritch Exarch ->
-        Eldritch Exarch_and_eater
+    | Eldritch eld1, Eldritch eld2 -> Eldritch (add_eldritch eld1 eld2)
     | Eldritch _, (SEC _ | SEC_pair _)
     | (SEC _ | SEC_pair _), Eldritch _ ->
         fail "cannot have both Eldritch and Shaper / Elder / Conqueror influences"
