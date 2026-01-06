@@ -332,8 +332,14 @@ let show item =
     match item.influence with
       | Not_influenced ->
           ""
-      | Fractured ->
+      | Fractured None ->
           " (Fractured)"
+      | Fractured (Some Exarch) ->
+          " (Fractured Exarch)"
+      | Fractured (Some Eater) ->
+          " (Fractured Eater)"
+      | Fractured (Some Exarch_and_eater) ->
+          " (Fractured Exarch / Eater)"
       | Synthesized ->
           " (Synthesized)"
       | SEC sec ->
@@ -748,7 +754,7 @@ let add_influence influence item =
         item |> add_sec_influence_tag sec
     | SEC_pair (sec1, sec2) ->
         item |> add_sec_influence_tag sec1 |> add_sec_influence_tag sec2
-    | Not_influenced | Fractured | Synthesized | Exarch | Eater | Exarch_and_eater ->
+    | Not_influenced | Fractured _ | Synthesized | Exarch | Eater | Exarch_and_eater ->
         item
 
 let make ?rarity base level influence =
@@ -994,7 +1000,7 @@ let apply_orb_of_dominance item =
       | SEC x -> [ x ]
       | SEC_pair (x, y) -> [ x; y ]
       | Not_influenced
-      | Fractured
+      | Fractured _
       | Synthesized
       | Exarch
       | Eater
@@ -1079,7 +1085,7 @@ let apply_orb_of_dominance item =
 let get_influence_tags item =
   match item.influence with
     | Not_influenced
-    | Fractured
+    | Fractured _
     | Synthesized
     | Exarch
     | Eater
@@ -1258,4 +1264,4 @@ let apply_fracturing_orb item =
       incr current_index;
       m
     in
-    { item with mods; influence = Influence.add item.influence Fractured }
+    { item with mods; influence = Influence.add item.influence (Fractured None) }

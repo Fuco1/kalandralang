@@ -258,7 +258,7 @@ let pp_buy { exact; rarity; influence; base; ilvl; mods; cost } =
         match influence with
           | Not_influenced ->
               empty
-          | Fractured ->
+          | Fractured _ ->
               seq [ atom "fractured"; space ]
           | Synthesized ->
               seq [ atom "synthesized"; space ]

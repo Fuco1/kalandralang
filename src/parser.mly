@@ -60,7 +60,7 @@ influence:
 | EXARCH { Influence.Exarch }
 | EATER { Influence.Eater }
 | SYNTHESIZED { Influence.Synthesized }
-| FRACTURED { Influence.Fractured }
+| FRACTURED { Influence.Fractured None }
 
 buy_arguments:
 | EXACT buy_arguments

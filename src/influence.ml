@@ -20,12 +20,25 @@ let show_sec = function
 let pp_sec sec =
   Pretext.atom (show_sec sec)
 
+type eld =
+  | Exarch
+  | Eater
+  | Exarch_and_eater
+
+let show_eld = function
+  | Exarch -> "Exarch"
+  | Eater -> "Eater"
+  | Exarch_and_eater -> "Exarch and Eater"
+
+let pp_eld eld =
+  Pretext.atom (show_eld eld)
+
 let compare_sec = (Stdlib.compare: sec -> sec -> int)
 
 (* TODO: fractured + exarch / eater (don't forget to update [includes]) *)
 type t =
   | Not_influenced
-  | Fractured
+  | Fractured of eld option
   | Synthesized
   | SEC of sec
   | SEC_pair of sec * sec
@@ -35,7 +48,11 @@ type t =
 
 let pp = function
   | Not_influenced -> Pretext.atom "Not_influenced"
-  | Fractured -> Pretext.atom "Fractured"
+  | Fractured x -> (
+      match x with
+        | None -> Pretext.atom "Fractured"
+        | Some eld -> Pretext.OCaml.variant "Fractured" [ pp_eld eld ]
+    )
   | Synthesized -> Pretext.atom "Synthesized"
   | SEC sec -> Pretext.OCaml.variant "SEC" [ pp_sec sec ]
   | SEC_pair (sec1, sec2) -> Pretext.OCaml.variant "SEC_pair" [ pp_sec sec1; pp_sec sec2 ]
@@ -47,9 +64,22 @@ let add a b =
   match a, b with
     | Not_influenced, x | x, Not_influenced ->
         x
-    | Fractured, Fractured ->
-        Fractured
-    | Fractured, _ | _, Fractured ->
+    | Fractured x, Fractured y ->
+        (match x, y with
+          | None, None -> Fractured None
+          | Some eld, None | None, Some eld -> Fractured (Some eld)
+          | Some eld1, Some eld2 when eld1 = eld2 -> Fractured (Some eld1)
+          | Some _, Some _ -> Fractured (Some Exarch_and_eater)
+        )
+    | Exarch, Fractured None -> Fractured (Some Exarch)
+    | Eater, Fractured None -> Fractured (Some Eater)
+    | Exarch_and_eater, Fractured None -> Fractured (Some Exarch_and_eater)
+    | Fractured None, Exarch | Fractured (Some Exarch), Exarch -> Fractured (Some Exarch)
+    | Fractured None, Eater | Fractured (Some Eater), Eater -> Fractured (Some Eater)
+    | Fractured (Some Eater), Exarch | Fractured (Some Exarch), Eater
+    | Fractured (Some Exarch_and_eater), Eater | Fractured (Some Exarch_and_eater), Exarch ->
+        Fractured (Some Exarch_and_eater)
+    | Fractured _, _ | _, Fractured _ ->
         fail "cannot both be fractured and influenced"
     | Synthesized, Synthesized ->
         Synthesized
@@ -81,8 +111,10 @@ let includes a b =
   match a, b with
     | Not_influenced, Not_influenced -> true
     | Not_influenced, _ -> false
-    | Fractured, Fractured -> true
-    | Fractured, _ -> false
+    | Fractured _, Fractured None -> true
+    | Fractured (Some eld1), Fractured (Some eld2) when eld1 == eld2 -> true
+    | Fractured (Some Exarch_and_eater), Fractured _ -> true
+    | Fractured _, _ -> false
     | Synthesized, Synthesized -> true
     | Synthesized, _ -> false
     | SEC a, SEC b -> a = b
