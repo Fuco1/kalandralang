@@ -28,7 +28,7 @@ type eld =
 let show_eld = function
   | Exarch -> "Exarch"
   | Eater -> "Eater"
-  | Exarch_and_eater -> "Exarch and Eater"
+  | Exarch_and_eater -> "Exarch_and_eater"
 
 let pp_eld eld =
   Pretext.atom (show_eld eld)
@@ -42,9 +42,7 @@ type t =
   | Synthesized
   | SEC of sec
   | SEC_pair of sec * sec
-  | Exarch
-  | Eater
-  | Exarch_and_eater
+  | Eldritch of eld
 
 let pp = function
   | Not_influenced -> Pretext.atom "Not_influenced"
@@ -56,9 +54,7 @@ let pp = function
   | Synthesized -> Pretext.atom "Synthesized"
   | SEC sec -> Pretext.OCaml.variant "SEC" [ pp_sec sec ]
   | SEC_pair (sec1, sec2) -> Pretext.OCaml.variant "SEC_pair" [ pp_sec sec1; pp_sec sec2 ]
-  | Exarch -> Pretext.atom "Exarch"
-  | Eater -> Pretext.atom "Eater"
-  | Exarch_and_eater -> Pretext.atom "Exarch_and_eater"
+  | Eldritch eld -> Pretext.OCaml.variant "Eldritch" [ pp_eld eld ]
 
 let add a b =
   match a, b with
@@ -71,14 +67,11 @@ let add a b =
           | Some eld1, Some eld2 when eld1 = eld2 -> Fractured (Some eld1)
           | Some _, Some _ -> Fractured (Some Exarch_and_eater)
         )
-    | Exarch, Fractured None -> Fractured (Some Exarch)
-    | Eater, Fractured None -> Fractured (Some Eater)
-    | Exarch_and_eater, Fractured None -> Fractured (Some Exarch_and_eater)
-    | Fractured None, Exarch | Fractured (Some Exarch), Exarch -> Fractured (Some Exarch)
-    | Fractured None, Eater | Fractured (Some Eater), Eater -> Fractured (Some Eater)
-    | Fractured (Some Eater), Exarch | Fractured (Some Exarch), Eater
-    | Fractured (Some Exarch_and_eater), Eater | Fractured (Some Exarch_and_eater), Exarch ->
-        Fractured (Some Exarch_and_eater)
+    | Eldritch eld, Fractured None -> Fractured (Some eld)
+    | Fractured None, Eldritch eld -> Fractured (Some eld)
+    | Fractured (Some eld1), Eldritch eld2 when eld1 = eld2 -> Fractured (Some eld1)
+    | Fractured (Some eld1), Eldritch eld2 when eld1 <> eld2 -> Fractured (Some Exarch_and_eater)
+    | Fractured (Some Exarch_and_eater), Eldritch _ -> Fractured (Some Exarch_and_eater)
     | Fractured _, _ | _, Fractured _ ->
         fail "cannot both be fractured and influenced"
     | Synthesized, Synthesized ->
@@ -94,16 +87,14 @@ let add a b =
         sec2
     | SEC _, SEC_pair _ | SEC_pair _, SEC _ | SEC_pair _, SEC_pair _ ->
         fail "cannot have more than two influences"
-    | Exarch, Exarch ->
-        Exarch
-    | Eater, Eater ->
-        Eater
-    | Exarch_and_eater, (Exarch | Eater | Exarch_and_eater)
-    | (Exarch | Eater), Exarch_and_eater
-    | Exarch, Eater | Eater, Exarch ->
-        Exarch_and_eater
-    | (Exarch | Eater | Exarch_and_eater), (SEC _ | SEC_pair _)
-    | (SEC _ | SEC_pair _), (Exarch | Eater | Exarch_and_eater) ->
+    | Eldritch Exarch, Eldritch Exarch -> Eldritch Exarch
+    | Eldritch Eater, Eldritch Eater -> Eldritch Eater
+    | Eldritch Exarch_and_eater, Eldritch _ -> Eldritch Exarch_and_eater
+    | Eldritch _, Eldritch Exarch_and_eater  -> Eldritch Exarch_and_eater
+    | Eldritch Exarch, Eldritch Eater | Eldritch Eater, Eldritch Exarch ->
+        Eldritch Exarch_and_eater
+    | Eldritch _, (SEC _ | SEC_pair _)
+    | (SEC _ | SEC_pair _), Eldritch _ ->
         fail "cannot have both Eldritch and Shaper / Elder / Conqueror influences"
 
 (* [a] includes [b] *)
@@ -122,9 +113,9 @@ let includes a b =
     | SEC_pair (a, b), SEC c -> a = c || b = c
     | SEC_pair (a, b), SEC_pair (c, d) -> (a = c && b = d) || (a = d && b = c)
     | SEC_pair _, _ -> false
-    | Exarch, Exarch -> true
-    | Exarch, _ -> false
-    | Eater, Eater -> true
-    | Eater, _ -> false
-    | Exarch_and_eater, (Exarch | Eater | Exarch_and_eater) -> true
-    | Exarch_and_eater, _ -> false
+    | Eldritch Exarch, Eldritch Exarch -> true
+    | Eldritch Exarch, _ -> false
+    | Eldritch Eater, Eldritch Eater -> true
+    | Eldritch Eater, _ -> false
+    | Eldritch Exarch_and_eater, Eldritch (Exarch | Eater | Exarch_and_eater) -> true
+    | Eldritch Exarch_and_eater, _ -> false

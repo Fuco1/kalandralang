@@ -363,7 +363,7 @@ let check_can_apply_conqueror_exalt (item: Item.t) =
     | Synthesized ->
         fail "cannot use a conqueror exalted orb on a synthesized item"
     | SEC _ | SEC_pair _
-    | Exarch | Eater | Exarch_and_eater ->
+    | Eldritch _ ->
         fail "cannot use a conqueror exalted orb on an influenced item"
 
 let item_cannot_be_split (item: Item.t) =
@@ -553,7 +553,7 @@ let apply_currency state (currency: AST.currency) =
                 x
             | SEC_pair _ ->
                 fail "%s has more than one influence" name
-            | Not_influenced | Exarch | Eater | Exarch_and_eater | Synthesized | Fractured _ ->
+            | Not_influenced | Eldritch _ | Synthesized | Fractured _ ->
                 fail "%s does not have a Shaper / Elder / Conqueror influence" name
         in
         let item_influence = get_sec_influence "current item" item in
@@ -624,7 +624,7 @@ let apply_currency state (currency: AST.currency) =
         item_must_be_rare item;
         (
           match item.influence with
-            | Not_influenced | Exarch | Eater | Exarch_and_eater ->
+            | Not_influenced | Eldritch _ ->
                 ()
             | Synthesized | Fractured _ | SEC _ | SEC_pair _ ->
                 fail "cannot fracture influenced, synthesized, and already-fractured items"
@@ -638,7 +638,7 @@ let apply_currency state (currency: AST.currency) =
           match item.influence with
             | Not_influenced | Synthesized | Fractured _ ->
                 ()
-            | SEC _ | SEC_pair _ | Exarch | Eater | Exarch_and_eater ->
+            | SEC _ | SEC_pair _ | Eldritch _ ->
                 fail "cannot harvest augment an influenced item"
         );
         return @@ Item.harvest_augment_and_remove ~tag item
@@ -648,7 +648,7 @@ let apply_currency state (currency: AST.currency) =
           match item.influence with
             | Not_influenced | Synthesized | Fractured _ ->
                 ()
-            | SEC _ | SEC_pair _ | Exarch | Eater | Exarch_and_eater ->
+            | SEC _ | SEC_pair _ | Eldritch _ ->
                 fail "cannot harvest non-X to X an influenced item"
         );
         let item =
@@ -703,7 +703,8 @@ let apply_currency state (currency: AST.currency) =
                 fail "cannot split a fractured item"
             | Synthesized ->
                 fail "cannot split a synthesized item"
-            | SEC _ | SEC_pair _ | Exarch | Eater | Exarch_and_eater ->
+            (* TODO: eldritch items can in fact be split *)
+            | SEC _ | SEC_pair _ | Eldritch _ ->
                 fail "cannot split an influenced item"
         );
         let item1, item2 = Item.split item in
@@ -715,7 +716,7 @@ let apply_currency state (currency: AST.currency) =
         (
           match item.influence with
             | Not_influenced | Synthesized
-            | SEC _ | SEC_pair _ | Exarch | Eater | Exarch_and_eater ->
+            | SEC _ | SEC_pair _ | Eldritch _ ->
                 ()
             | Fractured _ ->
                 fail "cannot imprint a fractured item"
