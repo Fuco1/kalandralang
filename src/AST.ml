@@ -75,7 +75,7 @@ type currency =
   | Redeemer_exalted_orb
   | Warlord_exalted_orb
   | Veiled_chaos_orb
-  | Veiled_orb
+  | Veiled_exalted_orb
   | Essence of Essence.name
   | Fossils of Fossil.t list
   | Orb_of_dominance
@@ -138,7 +138,7 @@ let show_currency = function
   | Redeemer_exalted_orb -> "redeemer_exalt"
   | Warlord_exalted_orb -> "warlord_exalt"
   | Veiled_chaos_orb -> "veiled_chaos"
-  | Veiled_orb -> "veil"
+  | Veiled_exalted_orb -> "veiled_exalt"
   | Essence name -> "essence_of_" ^ Essence.show_name name
   | Fossils fossils -> String.concat " + " (List.map Fossil.show fossils)
   | Orb_of_dominance -> "orb_of_dominance"

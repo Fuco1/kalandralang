@@ -643,6 +643,7 @@ The following keywords are instructions to apply currency to the current item.
 | Keyword | Currency |
 | --- | --- |
 | `veiled_chaos` | Veiled Chaos Orb (see also [Unveiling](#unveiling)) |
+| `veiled_exalt` | Veiled Exalted Orb (see also [Unveiling](#unveiling)) |
 
 ##### Awakener's Orb
 
@@ -898,7 +899,7 @@ through the Immortal Syndicate on the current item.
 
 | Keyword | Craft |
 | --- | --- |
-| `aisling` | Aisling T4: remove a random modifier and add a new veiled modifier |
+| `aisling` | Aisling T4: remove a random modifier and add a new veiled modifier (legacy, see "Veiled Exalted Orb") |
 
 ##### Unveiling
 

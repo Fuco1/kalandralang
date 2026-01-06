@@ -327,8 +327,8 @@ let beastcraft_add_prefix_remove_suffix: field =
 let beastcraft_add_suffix_remove_prefix: field =
   b "Farric Lynx Alpha" "beastcraft_add_suffix_remove_prefix" 5.
 
-let veil: field =
-  c "Veiled Orb" "veil" (10. *. div)
+let veiled_exalt: field =
+  c "Veiled Exalted Orb" "veiled_exalt" (10. *. div)
 
 let aisling: field =
   s "T4 Aisling" "aisling" div
@@ -366,10 +366,9 @@ let get_currency (currency: AST.currency) =
     | Warlord_exalted_orb ->
         get warlord_exalt
     | Veiled_chaos_orb ->
-        (* legacy *)
         get veiled_chaos
-    | Veiled_orb ->
-        get veil
+    | Veiled_exalted_orb ->
+        get veiled_exalt
     | Essence Anger ->
         get essence_of_anger
     | Essence Anguish ->
