@@ -742,13 +742,13 @@ let apply_currency state (currency: AST.currency) =
         let item = Item.spawn_random_mod ~only: Suffixes item
         in
         return @@ if (Item.has_mod_id Mod.prefixes_cannot_be_changed_id item) then
-           item
+          item
         else
-           Item.remove_random_mod
-             ~force_suffixes_cannot_be_changed: true
-             ~respect_cannot_be_changed: true
-             ~respect_cannot_roll: false
-             item
+          Item.remove_random_mod
+            ~force_suffixes_cannot_be_changed: true
+            ~respect_cannot_be_changed: true
+            ~respect_cannot_roll: false
+            item
     | Aisling ->
         with_item state @@ fun item ->
         item_must_be_rare item;
@@ -888,9 +888,9 @@ let run_simple_instruction state loc (instruction: AST.simple_instruction) =
                 fail "no imprint"
             | Some item, Some imprint ->
                 if item.split && not imprint.split then
-                    fail "cannot apply imprint (cannot revert to pre-split)"
+                  fail "cannot apply imprint (cannot revert to pre-split)"
                 else
-                    imprint
+                  imprint
         in
         goto_next { state with item = Some imprint; imprint = None }
     | Gain amount ->
