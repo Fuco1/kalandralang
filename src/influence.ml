@@ -42,7 +42,6 @@ let add_eldritch a b =
 
 let compare_sec = (Stdlib.compare: sec -> sec -> int)
 
-(* TODO: fractured + exarch / eater (don't forget to update [includes]) *)
 type t =
   | Not_influenced
   | Fractured of eld option
@@ -99,13 +98,13 @@ let add a b =
         fail "cannot have both Eldritch and Shaper / Elder / Conqueror influences"
 
 (* [a] includes [b] *)
-let includes a b =
+let rec includes a b =
   match a, b with
     | Not_influenced, Not_influenced -> true
     | Not_influenced, _ -> false
     | Fractured _, Fractured None -> true
-    | Fractured (Some eld1), Fractured (Some eld2) when eld1 == eld2 -> true
-    | Fractured (Some Exarch_and_eater), Fractured _ -> true
+    | Fractured (Some eld1), Fractured (Some eld2) -> includes (Eldritch eld1) (Eldritch eld2)
+    | Fractured (Some eld1), Eldritch eld2 -> includes (Eldritch eld1) (Eldritch eld2)
     | Fractured _, _ -> false
     | Synthesized, Synthesized -> true
     | Synthesized, _ -> false
